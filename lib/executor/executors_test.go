@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"go.k6.io/k6/lib/testutils"
+	"go.k6.io/k6/internal/build"
+	"go.k6.io/k6/internal/lib/testutils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/guregu/null.v3"
 
 	"go.k6.io/k6/lib"
-	"go.k6.io/k6/lib/consts"
 	"go.k6.io/k6/lib/fsext"
 	"go.k6.io/k6/lib/types"
 )
@@ -484,7 +484,7 @@ func TestArchiveRoundTripExecutorConfig(t *testing.T) {
 	}
 	arc1 := &lib.Archive{
 		Type:      "js",
-		K6Version: consts.Version,
+		K6Version: build.Version,
 		Options: lib.Options{
 			Scenarios: map[string]lib.ExecutorConfig{
 				"const-vus": execCfg,
