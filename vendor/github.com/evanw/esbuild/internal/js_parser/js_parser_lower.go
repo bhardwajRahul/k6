@@ -88,15 +88,14 @@ func (p *parser) markSyntaxFeature(feature compat.JSFeature, r logger.Range) (di
 			"Top-level await is not available in %s", where))
 		return
 
-	case compat.ArbitraryModuleNamespaceNames:
-		p.log.AddError(&p.tracker, r, fmt.Sprintf(
-			"Using a string as a module namespace identifier name is not supported in %s", where))
-		return
-
 	case compat.Bigint:
-		// Transforming these will never be supported
-		p.log.AddError(&p.tracker, r, fmt.Sprintf(
-			"Big integer literals are not available in %s", where))
+		// This can't be polyfilled
+		kind := logger.Warning
+		if p.suppressWarningsAboutWeirdCode || p.fnOrArrowDataVisit.tryBodyCount > 0 {
+			kind = logger.Debug
+		}
+		p.log.AddID(logger.MsgID_JS_BigInt, kind, &p.tracker, r, fmt.Sprintf(
+			"Big integer literals are not available in %s and may crash at run-time", where))
 		return
 
 	case compat.ImportMeta:
