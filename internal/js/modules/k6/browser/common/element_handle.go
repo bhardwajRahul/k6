@@ -43,6 +43,16 @@ type ElementHandle struct {
 	frame *Frame
 }
 
+// String returns a string repesentation of ElementHandle.
+// It exists mostly for debugging where we don't want fmt.Sprintf to just
+// go through a complex object and try to stringify it.
+func (h *ElementHandle) String() string {
+	return "ElementHandle{" +
+		" BaseJSHandle:  " + h.BaseJSHandle.String() +
+		" frame: " + h.frame.String() +
+		"}"
+}
+
 func (h *ElementHandle) boundingBox() (*Rect, error) {
 	var box *dom.BoxModel
 	var err error
@@ -745,6 +755,36 @@ func (h *ElementHandle) waitForSelector(
 		return r, nil
 	default:
 		return nil, nil //nolint:nilnil
+	}
+}
+
+func (h *ElementHandle) count(apiCtx context.Context, selector string) (int, error) {
+	parsedSelector, err := NewSelector(selector)
+	if err != nil {
+		return 0, err
+	}
+
+	fn := `
+			(node, injected, selector) => {
+				return injected.count(selector, node);
+			}
+		`
+	eopts := evalOptions{
+		forceCallable: true,
+		returnByValue: true,
+	}
+	result, err := h.evalWithScript(
+		apiCtx,
+		eopts, fn, parsedSelector,
+	)
+	if err != nil {
+		return 0, err
+	}
+	switch r := result.(type) {
+	case float64:
+		return int(r), nil
+	default:
+		return 0, fmt.Errorf("unexpected value %v of type %T", r, r)
 	}
 }
 

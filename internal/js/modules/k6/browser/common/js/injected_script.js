@@ -545,7 +545,7 @@ class InjectedScript {
     };
   }
 
-  fill(node, value) {
+  fill(node, value="") {
     const element = this._retarget(node, "follow-label");
     if (!element) {
       return "error:notconnected";
@@ -934,7 +934,7 @@ class InjectedScript {
     }
   }
 
-  waitForElementStates(node, states, timeout, ...args) {
+  waitForElementStates(node, states=[], timeout, ...args) {
     let lastRect = undefined;
     let counter = 0;
     let samePositionCounter = 0;
@@ -1040,5 +1040,10 @@ class InjectedScript {
     };
 
     return this.waitForPredicateFunction(predicate, polling, timeout, ...args);
+  }
+
+  count(selector, root) {
+    const elements = this.querySelectorAll(selector, root || document);
+    return elements.length;
   }
 }

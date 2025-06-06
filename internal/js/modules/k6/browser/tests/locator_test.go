@@ -315,7 +315,6 @@ func TestLocator(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -452,7 +451,6 @@ func TestLocator(t *testing.T) {
 		},
 	}
 	for _, tt := range sanityTests {
-		tt := tt
 		t.Run("timeout/"+tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -465,7 +463,6 @@ func TestLocator(t *testing.T) {
 	}
 
 	for _, tt := range sanityTests {
-		tt := tt
 		t.Run("strict/"+tt.name, func(t *testing.T) {
 			t.Parallel()
 			tb := newTestBrowser(t, withFileServer())
@@ -535,7 +532,6 @@ func TestLocatorElementState(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.state, func(t *testing.T) {
 			t.Parallel()
 
@@ -597,7 +593,6 @@ func TestLocatorElementState(t *testing.T) {
 		},
 	}
 	for _, tt := range sanityTests {
-		tt := tt
 		t.Run("timeout/"+tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -610,7 +605,6 @@ func TestLocatorElementState(t *testing.T) {
 	}
 
 	for _, tt := range sanityTests {
-		tt := tt
 		t.Run("strict/"+tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -724,4 +718,55 @@ func TestSelectOption(t *testing.T) {
 		}
 	`, tb.staticURL("select_options.html"))
 	assert.Equal(t, sobek.Undefined(), got.Result())
+}
+
+func TestCount(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		do   func(*testBrowser, *common.Page)
+	}{
+		{
+			"0", func(_ *testBrowser, p *common.Page) {
+				l := p.Locator("#NOTEXIST", nil)
+				c, err := l.Count()
+				require.NoError(t, err)
+				require.Equal(t, 0, c)
+			},
+		},
+		{
+			"1", func(_ *testBrowser, p *common.Page) {
+				l := p.Locator("#link", nil)
+				c, err := l.Count()
+				require.NoError(t, err)
+				require.Equal(t, 1, c)
+			},
+		},
+		{
+			"3", func(_ *testBrowser, p *common.Page) {
+				l := p.Locator("a", nil)
+				c, err := l.Count()
+				require.NoError(t, err)
+				require.Equal(t, 3, c)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tb := newTestBrowser(t, withFileServer())
+			p := tb.NewPage(nil)
+			opts := &common.FrameGotoOptions{
+				Timeout: common.DefaultTimeout,
+			}
+			_, err := p.Goto(
+				tb.staticURL("locators.html"),
+				opts,
+			)
+			tt.do(tb, p)
+			require.NoError(t, err)
+		})
+	}
 }
